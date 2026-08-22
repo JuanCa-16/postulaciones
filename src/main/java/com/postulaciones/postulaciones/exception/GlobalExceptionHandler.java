@@ -58,6 +58,22 @@ public class GlobalExceptionHandler {
                                 .body(respuesta);
         }
 
+        @ExceptionHandler(ErrorNegocioException.class)
+        public ResponseEntity<RespuestaDto<Void>> manejarErrorNegocio(
+                        ErrorNegocioException ex) {
+
+                String mensaje = ex.getMessage();
+
+                RespuestaDto<Void> respuesta = new RespuestaDto<>(
+                                true,
+                                mensaje,
+                                null);
+
+                return ResponseEntity
+                                .status(HttpStatus.BAD_REQUEST)
+                                .body(respuesta);
+        }
+
         @ExceptionHandler(Exception.class)
         public ResponseEntity<RespuestaDto<Void>> manejarErrorGeneral(Exception ex) {
 

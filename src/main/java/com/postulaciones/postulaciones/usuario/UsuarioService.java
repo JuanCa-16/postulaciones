@@ -1,5 +1,7 @@
 package com.postulaciones.postulaciones.usuario;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -7,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.postulaciones.postulaciones.estado.Estado;
 import com.postulaciones.postulaciones.estado.EstadoRepository;
 import com.postulaciones.postulaciones.exception.CredencialesInvalidasException;
+import com.postulaciones.postulaciones.exception.ErrorNegocioException;
 import com.postulaciones.postulaciones.exception.RecursoYaExisteException;
 import com.postulaciones.postulaciones.security.JwtService;
 import com.postulaciones.postulaciones.usuario.dto.LoginDto;
@@ -25,7 +28,7 @@ public class UsuarioService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
 
-    @Transactional
+    @Transactional // Para garantizar de que si hay fallo revertir los cambios que se alcanzaron a hacer
     public UsuarioResponseDto registar(RegistroDto dto) {
 
         // 1. Comprobar si ya existe el correo
@@ -114,5 +117,17 @@ public class UsuarioService {
 
         return new LoginResponseDto(token, respuesta);
 
+    }
+
+    public Usuario obtenerUsuarioAutenticado() {
+
+        Authentication authentication = SecurityContextHolder
+                .getContext()
+                .getAuthentication();
+
+        String correo = authentication.getName();
+
+        return usuarioRepository.findByCorreo(correo)
+                .orElseThrow(() -> new ErrorNegocioException("Usuario no encontrado"));
     }
 }
