@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import com.postulaciones.postulaciones.common.dto.RespuestaDto;
 import com.postulaciones.postulaciones.postulacion.dto.PostulacionActualizarDto;
 import com.postulaciones.postulaciones.postulacion.dto.PostulacionDto;
+import com.postulaciones.postulaciones.postulacion.dto.PostulacionHistorialRespuestaDto;
 import com.postulaciones.postulaciones.postulacion.dto.PostulacionRespuestaDto;
 
 import jakarta.validation.Valid;
@@ -26,71 +27,71 @@ import org.springframework.web.bind.annotation.PathVariable;
 @RequiredArgsConstructor
 public class PostulacionController {
 
-    private final PostulacionService postulacionService;
+        private final PostulacionService postulacionService;
 
-    @PostMapping()
-    public ResponseEntity<RespuestaDto<Void>> crear(@Valid @RequestBody PostulacionDto dto) {
+        @PostMapping()
+        public ResponseEntity<RespuestaDto<Void>> crear(@Valid @RequestBody PostulacionDto dto) {
 
-        postulacionService.crear(dto);
+                postulacionService.crear(dto);
 
-        RespuestaDto<Void> respuesta = new RespuestaDto<>(
-                false,
-                "Postulación creada correctamente",
-                null);
+                RespuestaDto<Void> respuesta = new RespuestaDto<>(
+                                false,
+                                "Postulación creada correctamente",
+                                null);
 
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(respuesta);
-    }
+                return ResponseEntity
+                                .status(HttpStatus.CREATED)
+                                .body(respuesta);
+        }
 
-    @GetMapping()
-    public ResponseEntity<RespuestaDto<List<PostulacionRespuestaDto>>> consultar() {
-        List<PostulacionRespuestaDto> postulaciones = postulacionService.consultar();
+        @GetMapping()
+        public ResponseEntity<RespuestaDto<List<PostulacionRespuestaDto>>> consultar() {
+                List<PostulacionRespuestaDto> postulaciones = postulacionService.consultar();
 
-        RespuestaDto<List<PostulacionRespuestaDto>> respuesta = new RespuestaDto<>(
-                false,
-                "Postulaciones encontradas",
-                postulaciones);
+                RespuestaDto<List<PostulacionRespuestaDto>> respuesta = new RespuestaDto<>(
+                                false,
+                                "Postulaciones encontradas",
+                                postulaciones);
 
-        return ResponseEntity.ok(respuesta);
-    }
+                return ResponseEntity.ok(respuesta);
+        }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<RespuestaDto<PostulacionRespuestaDto>> obtener(@PathVariable Long id) {
+        @GetMapping("/{id}")
+        public ResponseEntity<RespuestaDto<PostulacionHistorialRespuestaDto>> obtener(@PathVariable Long id) {
 
-        PostulacionRespuestaDto postulacion = postulacionService.obtnerPostulacion(id);
+                PostulacionHistorialRespuestaDto postulacion = postulacionService.obtnerPostulacion(id);
 
-        RespuestaDto<PostulacionRespuestaDto> respuesta = new RespuestaDto<PostulacionRespuestaDto>(
-                false,
-                "Postulación encontrada",
-                postulacion);
+                RespuestaDto<PostulacionHistorialRespuestaDto> respuesta = new RespuestaDto<PostulacionHistorialRespuestaDto>(
+                                false,
+                                "Postulación encontrada",
+                                postulacion);
 
-        return ResponseEntity.ok(respuesta);
-    }
+                return ResponseEntity.ok(respuesta);
+        }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<RespuestaDto<Void>> eliminar(@PathVariable Long id) {
+        @DeleteMapping("/{id}")
+        public ResponseEntity<RespuestaDto<Void>> eliminar(@PathVariable Long id) {
 
-        postulacionService.eliminar(id);
-        RespuestaDto<Void> respuesta = new RespuestaDto<Void>(
-                false,
-                "Postulación eliminada correctamente",
-                null);
+                postulacionService.eliminar(id);
+                RespuestaDto<Void> respuesta = new RespuestaDto<Void>(
+                                false,
+                                "Postulación eliminada correctamente",
+                                null);
 
-        return ResponseEntity.ok(respuesta);
-    }
+                return ResponseEntity.ok(respuesta);
+        }
 
-    @PatchMapping("/{id}")
-    public ResponseEntity<RespuestaDto<PostulacionRespuestaDto>> actulizar(@PathVariable Long id,
-            @RequestBody PostulacionActualizarDto dto) {
-        PostulacionRespuestaDto postulacion = postulacionService.actulizar(id, dto);
+        @PatchMapping("/{id}")
+        public ResponseEntity<RespuestaDto<PostulacionRespuestaDto>> actulizar(@PathVariable Long id,
+                        @RequestBody PostulacionActualizarDto dto) {
+                PostulacionRespuestaDto postulacion = postulacionService.actulizar(id, dto);
 
-        RespuestaDto<PostulacionRespuestaDto> respuesta = new RespuestaDto<>(
-                false,
-                "Postulación actualizada correctamente",
-                postulacion);
+                RespuestaDto<PostulacionRespuestaDto> respuesta = new RespuestaDto<>(
+                                false,
+                                "Postulación actualizada correctamente",
+                                postulacion);
 
-        return ResponseEntity.ok(respuesta);
-    }
+                return ResponseEntity.ok(respuesta);
+        }
 
 }

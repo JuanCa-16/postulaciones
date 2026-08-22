@@ -1,15 +1,21 @@
 package com.postulaciones.postulaciones.postulacion;
 
+import java.util.Comparator;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.postulaciones.postulaciones.estado.Estado;
 import com.postulaciones.postulaciones.estado.EstadoRepository;
 import com.postulaciones.postulaciones.estado.dto.EstadoResponseDto;
 import com.postulaciones.postulaciones.exception.ErrorNegocioException;
+import com.postulaciones.postulaciones.historial.Historial;
+import com.postulaciones.postulaciones.historial.HistorialService;
+import com.postulaciones.postulaciones.historial.dto.HistorialResponseDto;
 import com.postulaciones.postulaciones.postulacion.dto.PostulacionActualizarDto;
 import com.postulaciones.postulaciones.postulacion.dto.PostulacionDto;
+import com.postulaciones.postulaciones.postulacion.dto.PostulacionHistorialRespuestaDto;
 import com.postulaciones.postulaciones.postulacion.dto.PostulacionRespuestaDto;
 import com.postulaciones.postulaciones.usuario.Usuario;
 import com.postulaciones.postulaciones.usuario.UsuarioService;
@@ -23,6 +29,7 @@ public class PostulacionService {
     private final EstadoRepository estadoRepository;
     private final UsuarioService usuarioService;
     private final PostulacionRepository postulacionRepository;
+    private final HistorialService historialService;
 
     public void crear(PostulacionDto dto) {
 
@@ -58,13 +65,13 @@ public class PostulacionService {
                 .toList();
     }
 
-    public PostulacionRespuestaDto obtnerPostulacion(Long id) {
+    public PostulacionHistorialRespuestaDto obtnerPostulacion(Long id) {
         Usuario usuario = usuarioService.obtenerUsuarioAutenticado();
 
         Postulacion postulacion = postulacionRepository.findByIdAndUsuarioId(id, usuario.getId())
                 .orElseThrow(() -> new ErrorNegocioException("Postulación no encontrada"));
 
-        return convertirADto(postulacion);
+        return convertirADtoConHistorial(postulacion);
     }
 
     public void eliminar(Long id) {
@@ -76,30 +83,74 @@ public class PostulacionService {
         postulacionRepository.delete(postulacion);
     }
 
+    @Transactional
     public PostulacionRespuestaDto actulizar(Long id, PostulacionActualizarDto dto) {
         Usuario usuario = usuarioService.obtenerUsuarioAutenticado();
 
         Postulacion postulacion = postulacionRepository.findByIdAndUsuarioId(id, usuario.getId())
                 .orElseThrow(() -> new ErrorNegocioException("Postulación no encontrada"));
 
-        if (dto.getNombreOferta() != null) {
+        if (dto.getNombreOferta() != null && !dto.getNombreOferta().equals(postulacion.getNombreOferta())) {
+            String valorAntiguo = postulacion.getNombreOferta();
+
             postulacion.setNombreOferta(dto.getNombreOferta());
+
+            historialService.registrarCambio(
+                    postulacion,
+                    "Nombre Oferta",
+                    valorAntiguo,
+                    dto.getNombreOferta());
         }
 
-        if (dto.getNombreEmpresa() != null) {
+        if (dto.getNombreEmpresa() != null && !dto.getNombreEmpresa().equals(postulacion.getNombreEmpresa())) {
+            String valorAntiguo = postulacion.getNombreEmpresa();
+
             postulacion.setNombreEmpresa(dto.getNombreEmpresa());
+
+            historialService.registrarCambio(
+                    postulacion,
+                    "Nombre Empresa",
+                    valorAntiguo,
+                    dto.getNombreEmpresa());
         }
 
-        if (dto.getUrl() != null) {
+        if (dto.getUrl() != null && !dto.getUrl().equals(postulacion.getUrl())) {
+
+            String valorAntiguo = postulacion.getUrl();
+
             postulacion.setUrl(dto.getUrl());
+
+            historialService.registrarCambio(
+                    postulacion,
+                    "url",
+                    valorAntiguo,
+                    dto.getUrl());
         }
 
-        if (dto.getPaginaAplicacion() != null) {
+        if (dto.getPaginaAplicacion() != null && !dto.getPaginaAplicacion().equals(postulacion.getPaginaAplicacion())) {
+
+            String valorAntiguo = postulacion.getPaginaAplicacion();
+
             postulacion.setPaginaAplicacion(dto.getPaginaAplicacion());
+
+            historialService.registrarCambio(
+                    postulacion,
+                    "Pagina Aplicacion",
+                    valorAntiguo,
+                    dto.getPaginaAplicacion());
         }
 
-        if (dto.getModalidad() != null) {
+        if (dto.getModalidad() != null && !dto.getModalidad().equals(postulacion.getModalidad())) {
+
+            String valorAntiguo = postulacion.getModalidad().name();
+
             postulacion.setModalidad(dto.getModalidad());
+
+            historialService.registrarCambio(
+                    postulacion,
+                    "Modalidad",
+                    valorAntiguo,
+                    dto.getModalidad().name());
         }
 
         if (dto.getEstadoId() != null) {
@@ -108,7 +159,19 @@ public class PostulacionService {
                     .findByIdAndUsuarioId(dto.getEstadoId(), usuario.getId())
                     .orElseThrow(() -> new ErrorNegocioException("Estado no encontrado"));
 
-            postulacion.setEstado(estado);
+            if (!estado.getId().equals(postulacion.getEstado().getId())) {
+                String valorAntiguo = postulacion.getEstado().getNombre();
+                String valorNuevo = estado.getNombre();
+
+                postulacion.setEstado(estado);
+
+                historialService.registrarCambio(
+                        postulacion,
+                        "Estado",
+                        valorAntiguo,
+                        valorNuevo);
+            }
+
         }
 
         postulacion = postulacionRepository.save(postulacion);
@@ -131,5 +194,34 @@ public class PostulacionService {
                         postulacion.getEstado().getNombre(),
                         postulacion.getEstado().getColor(),
                         postulacion.getEstado().isPorDefecto()));
+    }
+
+    private PostulacionHistorialRespuestaDto convertirADtoConHistorial(Postulacion postulacion) {
+
+        List<HistorialResponseDto> historial = postulacion.getHistorial()
+                .stream()
+                .sorted(Comparator.comparing(
+                        Historial::getFechaActualizacion).reversed())
+                .map(h -> new HistorialResponseDto(
+                        h.getCampoActualizado(),
+                        h.getValorAntiguo(),
+                        h.getValorNuevo(),
+                        h.getFechaActualizacion()))
+                .toList();
+
+        return new PostulacionHistorialRespuestaDto(
+                postulacion.getId(),
+                postulacion.getNombreOferta(),
+                postulacion.getNombreEmpresa(),
+                postulacion.getUrl(),
+                postulacion.getPaginaAplicacion(),
+                postulacion.getModalidad(),
+                postulacion.getFechaPostulacion(),
+                new EstadoResponseDto(
+                        postulacion.getEstado().getId(),
+                        postulacion.getEstado().getNombre(),
+                        postulacion.getEstado().getColor(),
+                        postulacion.getEstado().isPorDefecto()),
+                historial);
     }
 }
