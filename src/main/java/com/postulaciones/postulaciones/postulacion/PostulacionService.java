@@ -2,6 +2,9 @@ package com.postulaciones.postulaciones.postulacion;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,6 +55,43 @@ public class PostulacionService {
         postulacion.setModalidad(dto.getModalidad());
 
         postulacionRepository.save(postulacion);
+    }
+
+    @Transactional
+    public void crearEnLote(List<PostulacionDto> dtos) {
+        Usuario usuario = usuarioService.obtenerUsuarioAutenticado();
+
+        // 1. Extraer los IDs de estado sin duplicados
+        Set<Long> estadoIds = dtos.stream()
+                .map(PostulacionDto::getEstadoId)
+                .collect(Collectors.toSet());
+
+        // 2. Buscar todos los estados válidos del usuario en UNA sola consulta SQL
+        List<Estado> estados = estadoRepository.findAllByIdInAndUsuarioId(estadoIds, usuario.getId());
+
+        Map<Long, Estado> estadoMap = estados.stream()
+                .collect(Collectors.toMap(Estado::getId, e -> e));
+
+        // 3. Validar que todos los estados ingresados pertenezcan al usuario
+        if (estados.size() != estadoIds.size()) {
+            throw new ErrorNegocioException("Uno o más estados no existen o no pertenecen al usuario");
+        }
+
+        // 4. Mapear DTOs a entidades
+        List<Postulacion> postulaciones = dtos.stream().map(dto -> {
+            Postulacion postulacion = new Postulacion();
+            postulacion.setUsuario(usuario);
+            postulacion.setEstado(estadoMap.get(dto.getEstadoId()));
+            postulacion.setNombreOferta(dto.getNombreOferta());
+            postulacion.setNombreEmpresa(dto.getNombreEmpresa());
+            postulacion.setUrl(dto.getUrl());
+            postulacion.setPaginaAplicacion(dto.getPaginaAplicacion());
+            postulacion.setModalidad(dto.getModalidad());
+            return postulacion;
+        }).collect(Collectors.toList());
+
+        // 5. Guardar todo el lote en una sola transacción
+        postulacionRepository.saveAll(postulaciones);
     }
 
     public List<PostulacionRespuestaDto> consultar() {

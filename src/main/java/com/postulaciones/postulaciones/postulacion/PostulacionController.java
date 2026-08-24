@@ -44,6 +44,26 @@ public class PostulacionController {
                                 .body(respuesta);
         }
 
+        // TODO: Falta validar los campos de cada elemento de la lista y que no llegue
+        // vacia
+        @PostMapping("/lote")
+        public ResponseEntity<RespuestaDto<Void>> crearEnLote(@RequestBody List<PostulacionDto> dtos) {
+
+                postulacionService.crearEnLote(dtos);
+
+                int totalExitosos = dtos.size();
+                String mensaje = String.format("Se crearon %d postulaciones correctamente", totalExitosos);
+
+                RespuestaDto<Void> respuesta = new RespuestaDto<>(
+                                false,
+                                mensaje,
+                                null);
+
+                return ResponseEntity
+                                .status(HttpStatus.CREATED)
+                                .body(respuesta);
+        }
+
         @GetMapping()
         public ResponseEntity<RespuestaDto<List<PostulacionRespuestaDto>>> consultar() {
                 List<PostulacionRespuestaDto> postulaciones = postulacionService.consultar();
