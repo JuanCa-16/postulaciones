@@ -11,4 +11,12 @@ public interface EstadoRepository extends JpaRepository<Estado, Long> {
     Optional<Estado> findByIdAndUsuarioId(Long id, Long usuarioId);
 
     List<Estado> findAllByIdInAndUsuarioId(Collection<Long> ids, Long usuarioId);
+
+    List<Estado> findByUsuarioId(Long usuarioId);
+
+    Optional<Estado> findByUsuarioIdAndPorDefectoTrue(Long usuarioId);
+
+    long countByUsuarioId(Long usuarioId);
+
+    Optional<Estado> findFirstByUsuarioIdAndIdNot(Long usuarioId, Long id);
 }
