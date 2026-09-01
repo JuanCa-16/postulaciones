@@ -8,5 +8,5 @@ import lombok.Setter;
 public class EstadoActulizarDto {
     private String nombre;
     private String color;
-    private boolean porDefecto;
+    private Boolean porDefecto; // B mayuscula permite null asi que si es con get, es is se se usa boolean que es solo true o false obliga a enviarlo
 }

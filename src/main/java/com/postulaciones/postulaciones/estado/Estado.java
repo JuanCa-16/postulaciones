@@ -1,5 +1,9 @@
 package com.postulaciones.postulaciones.estado;
 
+import java.time.LocalDateTime;
+
+import org.hibernate.annotations.CreationTimestamp;
+
 import com.postulaciones.postulaciones.usuario.Usuario;
 
 import jakarta.persistence.Column;
@@ -16,12 +20,12 @@ import lombok.Setter;
 @Setter
 @Entity
 public class Estado {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    //FORANEAS
+    // FORANEAS
 
     @ManyToOne
     @JoinColumn(name = "usuario_id", nullable = false)
@@ -37,4 +41,8 @@ public class Estado {
 
     @Column(nullable = false)
     private boolean porDefecto;
+
+    @CreationTimestamp
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime fechaCreacion;
 }
