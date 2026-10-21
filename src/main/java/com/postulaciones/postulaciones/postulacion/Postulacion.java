@@ -8,6 +8,7 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import com.postulaciones.postulaciones.estado.Estado;
 import com.postulaciones.postulaciones.historial.Historial;
+import com.postulaciones.postulaciones.nota.Nota;
 import com.postulaciones.postulaciones.usuario.Usuario;
 
 import jakarta.persistence.CascadeType;
@@ -15,40 +16,41 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import lombok.Getter;
 import lombok.Setter;
-
 
 @Getter
 @Setter
 @Entity
 public class Postulacion {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    //FORANEAS
+    // FORANEAS
     @ManyToOne
     @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
 
     @ManyToOne
     @JoinColumn(name = "estado_id", nullable = false)
-    private Estado estado;  
+    private Estado estado;
 
     //
 
     private String nombreOferta;
-    private String nombreEmpresa; 
+    private String nombreEmpresa;
     private String paginaAplicacion;
-    private String url; 
+    private String url;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -56,14 +58,14 @@ public class Postulacion {
 
     @CreationTimestamp
     @Column(nullable = false)
-    private LocalDateTime fechaPostulacion;  
-
+    private LocalDateTime fechaPostulacion;
 
     // PADRES DE FORANEAS (No es una columna)
-    @OneToMany(
-        mappedBy = "postulacion", //Debe coindiir con el del objeto Historial
-        cascade = CascadeType.ALL,
-        orphanRemoval = true)
+    @OneToMany(mappedBy = "postulacion", // Debe coindiir con el del objeto Historial
+            cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Historial> historial = new ArrayList<>();
-    
+
+    @OneToOne(mappedBy = "postulacion", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private Nota nota;
+
 }

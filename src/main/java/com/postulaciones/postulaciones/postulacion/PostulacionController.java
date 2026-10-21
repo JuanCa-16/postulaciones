@@ -4,8 +4,8 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.postulaciones.postulaciones.common.dto.RespuestaDto;
 import com.postulaciones.postulaciones.postulacion.dto.PostulacionActualizarDto;
@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-@Controller
+@RestController
 @RequestMapping("/api/postulaciones")
 @RequiredArgsConstructor
 public class PostulacionController {
