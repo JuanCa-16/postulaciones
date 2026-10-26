@@ -63,6 +63,7 @@ public class SecurityConfig {
 
                 configuration.setAllowedOrigins(List.of(
                                 "http://localhost:4200",
+                                "https://dokoweb.vercel.app/",
                                 "https://postuya.vercel.app"));
 
                 configuration.setAllowedMethods(
