@@ -30,7 +30,8 @@ public interface PostulacionRepository extends JpaRepository<Postulacion, Long> 
                 p.estado.nombre,
                 p.estado.color,
                 p.estado.porDefecto,
-            COUNT(p)
+                COUNT(p),
+                0.0
             )
             FROM Postulacion p
             WHERE p.usuario.id = :usuarioId
@@ -59,7 +60,8 @@ public interface PostulacionRepository extends JpaRepository<Postulacion, Long> 
     @Query("""
                 SELECT new com.postulaciones.postulaciones.estadistica.dto.ModalidadEstadisticaDTO(
                     p.modalidad,
-                    COUNT(p)
+                    COUNT(p),
+                    0
                 )
                 FROM Postulacion p
                 WHERE p.usuario.id = :usuarioId
@@ -76,6 +78,7 @@ public interface PostulacionRepository extends JpaRepository<Postulacion, Long> 
                 )
                 FROM Postulacion p
                 WHERE p.usuario.id = :usuarioId
+                AND (:estadoId IS NULL OR p.estado.id = :estadoId)
                 AND p.nombreEmpresa IS NOT NULL
                 AND TRIM(p.nombreEmpresa) <> ''
                 GROUP BY LOWER(TRIM(p.nombreEmpresa))
@@ -83,6 +86,7 @@ public interface PostulacionRepository extends JpaRepository<Postulacion, Long> 
             """)
     List<RankingEstadisticaDTO> topEmpresas(
             @Param("usuarioId") Long usuarioId,
+            @Param("estadoId") Long estadoId,
             Pageable pageable);
 
     @Query("""
@@ -92,6 +96,7 @@ public interface PostulacionRepository extends JpaRepository<Postulacion, Long> 
                 )
                 FROM Postulacion p
                 WHERE p.usuario.id = :usuarioId
+                AND (:estadoId IS NULL OR p.estado.id = :estadoId)
                 AND p.paginaAplicacion IS NOT NULL
                 AND TRIM(p.paginaAplicacion) <> ''
                 GROUP BY LOWER(TRIM(p.paginaAplicacion))
@@ -99,5 +104,6 @@ public interface PostulacionRepository extends JpaRepository<Postulacion, Long> 
             """)
     List<RankingEstadisticaDTO> topPaginasAplicacion(
             @Param("usuarioId") Long usuarioId,
+            @Param("estadoId") Long estadoId,
             Pageable pageable);
 }

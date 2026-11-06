@@ -40,7 +40,19 @@ public class EstadisticaService {
 
         Usuario usuario = usuarioService.obtenerUsuarioAutenticado();
 
-        return postulacionRepository.contarPorEstado(usuario.getId());
+        Long total = postulacionRepository.countByUsuarioId(usuario.getId());
+
+        List<EstadoEstadisticaDTO> resultados = postulacionRepository.contarPorEstado(usuario.getId());
+
+        resultados.forEach(estado -> {
+            double porcentaje = total == 0
+                    ? 0.0
+                    : Math.round((estado.getCantidad() * 10000.0) / total) / 100.0;
+
+            estado.setPorcentaje(porcentaje);
+        });
+
+        return resultados;
     }
 
     public List<FechaEstadisticaDTO> postulacionesDiarias() {
@@ -49,10 +61,11 @@ public class EstadisticaService {
 
         LocalDate hoy = LocalDate.now(ZoneId.of("America/Bogota"));
 
-        LocalDate desdeFecha = hoy.minusDays(29);
+        LocalDate desdeFecha = hoy.withDayOfYear(1);
+        LocalDate hastaFecha = hoy.withDayOfYear(hoy.lengthOfYear());
 
         LocalDateTime desde = desdeFecha.atStartOfDay();
-        LocalDateTime hasta = hoy.atTime(LocalTime.MAX);
+        LocalDateTime hasta = hastaFecha.atTime(LocalTime.MAX);
 
         List<FechaEstadisticaDTO> resultados = postulacionRepository.contarPorFecha(usuario.getId(), desde, hasta);
 
@@ -61,7 +74,7 @@ public class EstadisticaService {
                         FechaEstadisticaDTO::getFecha,
                         FechaEstadisticaDTO::getCantidad));
 
-        return IntStream.range(0, 30)
+        return IntStream.rangeClosed(0, hoy.lengthOfYear() - 1)
                 .mapToObj(i -> {
                     LocalDate fecha = desdeFecha.plusDays(i);
 
@@ -75,22 +88,35 @@ public class EstadisticaService {
     public List<ModalidadEstadisticaDTO> postulacionesPorModalidad() {
         Usuario usuario = usuarioService.obtenerUsuarioAutenticado();
 
-        return postulacionRepository.contarPorModalidad(usuario.getId());
+        Long total = postulacionRepository.countByUsuarioId(usuario.getId());
+
+        List<ModalidadEstadisticaDTO> resultados = postulacionRepository.contarPorModalidad(usuario.getId());
+        resultados.forEach(estado -> {
+            int porcentaje = total == 0
+                    ? 0
+                    : (int) Math.round((estado.getCantidad() * 100.0) / total);
+
+            estado.setPorcentaje(porcentaje);
+        });
+
+        return resultados;
     }
 
-    public List<RankingEstadisticaDTO> topEmpresas() {
+    public List<RankingEstadisticaDTO> topEmpresas(Long estadoId) {
         Usuario usuario = usuarioService.obtenerUsuarioAutenticado();
 
         return postulacionRepository.topEmpresas(
                 usuario.getId(),
-                PageRequest.of(0, 3));
+                estadoId,
+                PageRequest.of(0, 5));
     }
 
-    public List<RankingEstadisticaDTO> topPaginasAplicacion() {
+    public List<RankingEstadisticaDTO> topPaginasAplicacion(Long estadoId) {
         Usuario usuario = usuarioService.obtenerUsuarioAutenticado();
 
         return postulacionRepository.topPaginasAplicacion(
                 usuario.getId(),
-                PageRequest.of(0, 3));
+                estadoId,
+                PageRequest.of(0, 5));
     }
 }
