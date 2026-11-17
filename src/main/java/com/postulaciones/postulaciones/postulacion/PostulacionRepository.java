@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,6 +16,7 @@ import com.postulaciones.postulaciones.estadistica.dto.ModalidadEstadisticaDTO;
 import com.postulaciones.postulaciones.estadistica.dto.RankingEstadisticaDTO;
 
 public interface PostulacionRepository extends JpaRepository<Postulacion, Long> {
+    @EntityGraph(attributePaths = "estado")//Por la lAZY "trae las postulaciones Y su estado en una sola consulta"
     List<Postulacion> findByUsuarioIdOrderByFechaPostulacionDesc(Long usuarioId);
 
     Optional<Postulacion> findByIdAndUsuarioId(Long id, Long usuarioId);

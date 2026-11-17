@@ -48,8 +48,6 @@ public class NotaService {
             notaRepository.findByPostulacionId(postulacion.getId())
                     .ifPresent(notaRepository::delete);
 
-            postulacion.setNota(null);
-
             return null;
         }
 
@@ -57,7 +55,6 @@ public class NotaService {
                 .orElseGet(() -> {
                     Nota nuevaNota = new Nota();
                     nuevaNota.setPostulacion(postulacion);
-                    postulacion.setNota(nuevaNota);
                     return nuevaNota;
                 });
 
