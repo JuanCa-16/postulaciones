@@ -37,11 +37,11 @@ public class Postulacion {
     private Long id;
 
     // FORANEAS
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "estado_id", nullable = false)
     private Estado estado;
 
@@ -65,7 +65,5 @@ public class Postulacion {
             cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Historial> historial = new ArrayList<>();
 
-    @OneToOne(mappedBy = "postulacion", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private Nota nota;
 
 }

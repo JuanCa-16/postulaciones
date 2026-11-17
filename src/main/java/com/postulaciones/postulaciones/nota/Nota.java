@@ -2,6 +2,8 @@ package com.postulaciones.postulaciones.nota;
 
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import com.postulaciones.postulaciones.postulacion.Postulacion;
@@ -39,5 +41,6 @@ public class Nota {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "postulacion_id", nullable = false, unique = true)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Postulacion postulacion;
 }
